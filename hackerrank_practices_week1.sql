@@ -69,6 +69,46 @@ SELECT
     FLOOR(AVG(POPULATION))
 FROM CITY;
 
-## Solving Idea 1: 반올림은 ROUND(), 버림은 FLOOR()
+## Solving Idea 1: 반올림은 ROUND(), 버림은 FLOOR(), 올림은 CEIL()
+
+## SOLVED !
+
+
+# Problem 3: Population Density Difference (https://www.hackerrank.com/challenges/population-density-difference/problem?isFullScreen=true)
+
+## Submission 1:
+SELECT
+    max(population) - min(population)
+From city;
+
+## SOLVED !
+
+
+# Problem 4: The Blunder (https://www.hackerrank.com/challenges/the-blunder/problem?isFullScreen=true)
+-- 어려움 ....
+
+## Solving Idea 1: 해당 문제는 정상적인 데이터가 주어지고 0을 빼고 잘못 입력한 데이터 베이스와의 차이를 계산하라는 문제
+## Solving Idea 2: REPLACE(str, from_str, to_str): 원본문자열에서 찾을 문자열을 바꿀 문자열로 바꿔주는 함수 (숫자 넣으면 자동 문자열 변환)
+## Solving Idea 3: CAST(값 AS 바꿀 데이터 타입): 데이터 타입을 바꿔주는 함수
+
+## Submission 1:
+SELECT
+    CEIL(
+        AVG(Salary)
+        - AVG(CAST(REPLACE(Salary, 0, '')AS integer))
+    )
+From EMPLOYEES
+WHERE Salary > 1000 AND Salary < power(10,5);
+
+## Mistake 1: REPLACE(Salary, 0, '') > 0도 문자열로 입력해야하므로 '0'으로 수정
+## Mistake 2: MySQL에서는 INTEGER보단 UNSIGNED를 쓰는게 나음
+
+## Submission 2:
+SELECT
+    CEIL(
+        AVG(Salary)
+        - AVG(CAST(REPLACE(Salary, '0', '')AS UNSIGNED))
+    )
+From EMPLOYEES;
 
 ## SOLVED !
