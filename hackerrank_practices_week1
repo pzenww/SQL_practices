@@ -1,4 +1,19 @@
 # Hackerrank > SQL > Easy > Basic Select 문제 풀어본 결과 너무 쉬워서 Advanced Select로 변경
 
+
+
 ## Problem: Type of Triangle (https://www.hackerrank.com/challenges/what-type-of-triangle/problem?isFullScreen=true)
-## Submission:
+
+## Submission 1:
+SELECT
+    CASE
+    WHEN A = B = C THEN 'Equilateral'
+    WHEN A = B OR B = C OR A = C AND NOT A = B = C THEN 'Isosceles'
+    WHEN A + B < C OR A + C < B OR B + C < A THEN 'Not A Triangle'
+    ELSE 'Scalene'
+END AS Output
+FROM TRIANGLES;
+
+## Mistake 1: SQL은 Python처럼 체인 비교 (A=B=C)를 지원하지 않음 > A = B AND B = C 로 수정해야 맞는 문법
+## Mistake 2: 삼각형을 구분하기 이전에 Not A Triangle부터 확인해야함 > 조건 순서도 신경쓰기
+## Mistake 3: OR / AND를 같이 사용할 때는 괄호를 활용하여 우선순위를 명확히 해줘야함
