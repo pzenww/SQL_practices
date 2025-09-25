@@ -82,3 +82,146 @@ ORDER BY s1.score DESC;
 
 
 -- 180
+
+/*
+JOIN문: 두 개 이상의 테이블을 합쳐서 하나의 결과 집합을 만듦
+
+SELECT 컬럼들
+FROM 테이블A a
+JOIN 테이블B b
+  ON a.기준컬럼 = b.기준컬럼; > ON: 어떤 컬럼을 기준으로 합칠지 정하는 부분
+
+기본 JOIN은 모든 기준을 만족하는 행만 결과에 포함
+*/
+
+select distinct l1.num as ConsecutiveNums
+from logs l1
+join logs l2
+    on l2.id = l1.id + 1 and l2.num = l1.num
+join logs l3
+    on l3.id = l2.id + 1 and l3.num = l1.num;
+
+-- 다른 방법 (조금 더 비효율적이긴 함)
+
+SELECT DISTINCT l1.num as ConsecutiveNums
+FROM
+    Logs l1,
+    Logs l2,
+    Logs l3 -- 카테시안 곱 발생 > 불필요한 행까지 만들어져서 비효율적임
+WHERE
+    l1.Id = l2.Id - 1
+    AND l2.Id = l3.Id - 1
+    AND l1.Num = l2.Num
+    AND l2.Num = l3.Num
+;
+
+/*
+하나의 데이터를 각각 다르게 불러오고 합칠 수 있다는 특징을 활용해서
+조금더 효율적으로 쿼리 작성하기
+*/
+
+
+
+-- 181 번호 확인 안 하고 그냥 풀었네 쩝 어쩐지 쉽더라
+
+select e1.name as Employee
+from employee e1
+join employee e2
+    on e1.managerid = e2.id
+where e1.salary > e2.salary;
+
+/*
+쿼리 잘 작성하긴 했으나 아직 join한 후의 테이블이 머리에 잘 안 그려짐
+
+e1.id | e1.name | e1.salary | e1.managerId | e2.id | e2.name | e2.salary | e2.managerId
+------+---------+-----------+--------------+-------+---------+-----------+--------------
+1     | Joe     | 70000     | 3            | 3     | Sam     | 60000     | NULL
+2     | Henry   | 80000     | 4            | 4     | Max     | 90000     | NULL
+이런식으로 JOIN됨
+
+e1.id 3,4에 해당되는 행이 없는 이유는 managerid가 null이기 때문
+*/
+
+
+
+-- 184
+
+select
+    d.name as Department,
+    e.name as Employee,
+    e.salary as Salary
+from employee e
+join department d
+    on e.departmentid = d.id
+where e.salary = (
+    select max(salary)
+    from employee
+    where departmentid = e.departmentid
+    );
+
+/*
+서브쿼리 연결 로직이 아직 잘 안 와닿는거 같음
+이번 쿼리에서는
+where e.salary = (
+    select max(salary)
+    from employee
+    where departmentid = e.departmentid
+    )
+이 부분을 서브쿼리로 넣지 않아서 틀렸는데
+e.salary를 서브쿼리로 max(salary)로 정해두는 거라는건 이해가 되는데
+where departmentid = e.departmentid 로 해야하는게 약간 안 와닿음
+
+그리고 서브쿼리 돌아가는 로직이 잘 이해가 안 가서 지피티한테 풀어서 설명해달라고 하니까
+
+1단계: 바깥쿼리 첫 행 (Joe, dept=1)
+e.departmentId = 1
+서브쿼리 실행: SELECT MAX(salary) FROM Employee WHERE departmentId = 1;
+→ 90000
+조건 비교: e.salary=70000 vs 90000 → ❌ Joe 제외
+
+이런식으로 하나씩 보니까 좀 알 것 같당
+*/
+
+-- 더 빠른 방법
+
+SELECT Department, Employee, Salary
+FROM (
+    SELECT d.name AS Department,
+           e.name AS Employee,
+           e.salary AS Salary,
+           RANK() OVER (
+               PARTITION BY e.departmentId
+               ORDER BY e.salary DESC
+           ) AS rnk
+    FROM Employee e
+    JOIN Department d ON e.departmentId = d.id
+) t
+WHERE rnk = 1;
+
+/* 원래 RANK() OVER (PARTITION BY _ ORDER BY) 활용하고팠는데 어디에 넣어야할지 몰랐삼..
+아예 rank 열이 포함된 테이블을 만들고 거기서 다시 rank=1을 조건으로 필요한 결과값만 select하는 방법이군
+*/
+
+
+
+-- 185 (HARD)
+
+SELECT Department, Employee, Salary
+FROM (
+    SELECT d.name AS Department,
+           e.name AS Employee,
+           e.salary AS Salary,
+           DENSE_RANK() OVER (
+               PARTITION BY e.departmentId
+               ORDER BY e.salary DESC
+           ) AS rnk
+    FROM Employee e
+    JOIN Department d ON e.departmentId = d.id
+) t
+WHERE rnk = 1 OR rnk = 2 OR rnk = 3;
+
+/*
+생각보다 184번 활용하니까 쉬웠음
+DENSE_RANK()랑 AND가 아닌 OR인거 조심!
+*/
+
