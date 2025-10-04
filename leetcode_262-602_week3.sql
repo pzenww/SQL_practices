@@ -135,8 +135,8 @@ FROM Employee
 WHERE id IN (
     SELECT managerId  -- 애초에 name과 id가 일대일 대응이기 때문에 조건을 서브쿼리로 만들고 그 조건에 해당되는 id를 뽑으면 됨
     FROM Employee 
-    GROUP BY managerId 
-    HAVING COUNT(*) >= 5)
+    GROUP BY managerId -- 그냥 id로 GROUP BY 해도 됨
+    HAVING COUNT(*) >= 5) 
 
 
 
@@ -216,6 +216,7 @@ WHERE
 > 구간의 가운데/시작/끝 중 하나라도 만족한다면 연속하는 3행 이상의 경우라고 정의하는 발상이 .. 내 머리로는 아직 생각해낼 수 없는듯 ㅠ
 */
 
+-- 이 방법으로 한 번 다시 해보기
 
 
 -- 602
@@ -230,7 +231,7 @@ with id_friend as
 UNION ALL
     SELECT accepter_id AS id, requester_id AS friend FROM RequestAccepted
 )
-SELECT id, COUNT(DISTINCT friend) AS num
+SELECT id, COUNT(DISTINCT friend) AS num -- 가장 많은 사람이 1명일 땐 distinct 없어도 되긴 함
 FROM id_friend
 GROUP BY id
 order by num desc limit 1; -- max는 집계합수라 제한이 은근 많으므로 가장 큰 수 / 가장 작은 수 하나 뽑을 떈 order by + limit 조합을 활용할 것
