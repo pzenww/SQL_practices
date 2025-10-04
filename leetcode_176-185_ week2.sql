@@ -27,7 +27,7 @@ select
 /* 
 CREATE FUNCTION: 사용자 정의 함수(User-Defined Function, UDF) 를 만들 때 쓰는 구문
 
-CREATE FUNCTION 함수이름(매개변수 타입) 
+CREATE FUNCTION > 함수가 아니라 MySQL에서 제공하는 기능임 > MySQL에서만 사용 가능
 RETURNS 반환타입
 BEGIN
    (함수 안에서 실행할 SQL 문)
@@ -36,7 +36,7 @@ END;
 */
 
 /*
-주의할점: SET문, RETURN문, CREATE FUNCTION문 총 3개의 쿼리를 실행한거기 때문에 ;도 꼭 각 쿼리 끝나고 써줘야함
+주의할점: SET문 (얘도 MySQL에서만 제공하는 기능), RETURN문, CREATE FUNCTION문 총 3개의 쿼리를 실행한거기 때문에 ;도 꼭 각 쿼리 끝나고 써줘야함
 */
 
 create function getNthHighestSalary(n int) returns int
@@ -75,8 +75,8 @@ order by score desc;
 SELECT s1.score, 
        (SELECT COUNT(DISTINCT s2.score) -- 동일한 테이블에서 숫자 가져오기 (동일한 숫자는 하나로 취급)
         FROM Scores s2 
-        WHERE s2.score >= s1.score) AS rank -- 자기와 같거나 보다 더 큰 숫자의 개수를 세서 순위로 설정
-FROM Scores s1
+        WHERE s2.score >= s1.score) AS 'rank' -- 자기와 같거나 보다 더 큰 숫자의 개수를 세서 순위로 설정
+FROM Scores s1  -- rank 와 같이 예약어로 이미 MySQL에 지정되어있는건 오류가 날 가능성이 커서 ''을 써주는게 좋음
 ORDER BY s1.score DESC;
 
 
