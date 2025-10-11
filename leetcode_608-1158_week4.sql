@@ -60,3 +60,121 @@ order by id;
 
 2. 정신없긴 한데 그래도 마지막에 Output에 맞게 정렬 꼭 해주긔..
    위 쿼리로 순서가 막 2143 이렇게 뒤죽박죽 되어있기 땜에 꼭 정렬해주고 끝나야함..
+*/
+
+
+
+-- 1045
+
+/*
+처음에는
+with product as (
+    select
+        customer_id,
+        (select
+            count(product_key)
+    from customer
+    group by customer_id) as product_cnt
+)
+select
+    customer_id
+from product
+where product_cnt = (select max(product_cnt) from product);
+로 쿼리를 작성해서
+상품의 갯수와 customer가 구입한 갯수가 동일하면 모두 구매한 고객으로 처리하는건 잘 접근했으나, 뭔가 꼬임
+
++ with로 CTE 만들 때는 서브쿼리를 그 안에 작성할 수 없음
+*/
+
+/*
+2트
+select
+    customer_id
+from customer
+where 
+    (select count(distinct product_key) from product)
+    = (select count(distinct product_key) from customer group by customer_id);
+그냥 갯수 조건을 아예 서브쿼리로 한번에 넣어버림
+흑 근데 또 안 됨.. 왜냐면 select count(distinct product_key) from customer group by customer_id 가 1개 이상의 값을 반환해서 = 비교가 불가능..
+
+답답해서 지피티한테 고쳐달랬더니
+group by를 밖으로 빼고 having으로 조건 넣으라네
+*/
+
+select
+    customer_id
+from customer
+group by customer_id
+having 
+    (select count(distinct product_key) from product)
+    = (select count(distinct product_key));  --드디어 성공 ...
+
+
+
+-- 1070 (오오 이 문제 뭔가 실무 문제 같고 조은듯!)
+
+/*
+1트
+select 
+    product_id, 
+    year as first_year, 
+    quantity, 
+    price 
+from sales 
+group by product_id 
+having year = (select min(year) from sales)
+아 근데 일케 하니까 product_id별 첫번째 연도가 아니라 전체 product 중 첫번째 연도로 됨...
+*/
+
+SELECT product_id, year AS first_year, quantity, price
+FROM (
+  SELECT
+    s.*,
+    MIN(year) OVER (PARTITION BY product_id) AS first_year -- MIN() OVER (PARTITION BY ) 에서 OVER~이 거의 모든 집계함수랑 같이 쓸 수 있다는 점 ㄷ
+  FROM Sales AS s
+) t -- 이런식으로 서브쿼리 작성하는거 좀 연습해봐야할듯
+WHERE t.year = t.first_year;
+
+/*
+GROUP BY vs PARTITION BY
+
+[ GROUP BY ]
+- 역할: 데이터를 그룹 단위로 **요약(Aggregate)**  
+- 행 수 변화: ✅ 줄어듦 (그룹당 1행만 남음)  
+- 사용 위치: `SELECT`, `HAVING`, `ORDER BY` 등  
+- 결과 형태: 그룹별로 하나의 집계 결과만 남김  
+
+[ PARTITION BY ]
+- 역할: 데이터를 그룹(Partition)으로 나누되 행은 유지, 각 파티션 내에서 집계 또는 순위 계산.
+- 행 수 변화: ❌ 유지됨 (원본 행 그대로 존재)
+- 사용 위치: SELECT절의 OVER() 내부
+- 결과 형태: 파티션별 집계 결과가 모든 행마다 표시됨
+*/
+
+
+
+-- 1158 (오 이거도 약간 실무 같당)
+
+/*
+1트
+select
+    distinct o.buyer_id,
+    u.join_date,
+    (select 
+        count(order_date) 
+    from orders 
+    where year(order_date) = 2019) as orders_in_2019
+from orders as o
+join users as u on o.buyer_id = u.user_id
+order by o.buyer_id
+근데 이렇게 하니까 또 각 buyer_id별 2019년에 주문한 횟수가 아니라 전체 buyer에서 2019년에 주문한 횟수로 됨...
+*/
+
+SELECT 
+  u.user_id AS buyer_id,
+  u.join_date,
+  COUNT(o.order_id) AS orders_in_2019
+FROM Users u -- 기준 테이블 잘 잡긔..
+LEFT JOIN Orders o 
+  ON u.user_id = o.buyer_id AND YEAR(o.order_date) = 2019 -- 애초에 2019로 거르고 join
+GROUP BY u.user_id;
