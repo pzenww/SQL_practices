@@ -20,7 +20,7 @@ from tree;
 
 /*
 쉬운 풀이방법을 봤는데, 똑같은데 서브쿼리에서 where p_id is not null 이 조건은 필요없는 것 같음
-아마 첫번째 case when 조건에서 null인게 걸러져서 그런듯
+아마 첫번째 case when 조건에서 null인게 걸러져서 그런듯  -> 순서대로 조건 걸러짐
 */
 
 
@@ -83,7 +83,6 @@ where product_cnt = (select max(product_cnt) from product);
 로 쿼리를 작성해서
 상품의 갯수와 customer가 구입한 갯수가 동일하면 모두 구매한 고객으로 처리하는건 잘 접근했으나, 뭔가 꼬임
 
-+ with로 CTE 만들 때는 서브쿼리를 그 안에 작성할 수 없음
 */
 
 /*
@@ -151,6 +150,10 @@ GROUP BY vs PARTITION BY
 - 결과 형태: 파티션별 집계 결과가 모든 행마다 표시됨
 */
 
+/*
+들여쓰기는 실무에서 정해서 정해진대로 함
+왜냐면 들여쓰기는 크게 코드에 영향이 없어서 그냥 가독성만을 위해서 하는 것)
+*/
 
 
 -- 1158 (오 이거도 약간 실무 같당)
@@ -178,3 +181,10 @@ FROM Users u -- 기준 테이블 잘 잡긔..
 LEFT JOIN Orders o 
   ON u.user_id = o.buyer_id AND YEAR(o.order_date) = 2019 -- 애초에 2019로 거르고 join
 GROUP BY u.user_id;
+
+/*
+join vs left join
+
+join (inner join): A and B
+left join: A 전체 + B는 A와의 여집합만 포함
+*/
