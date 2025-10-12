@@ -180,7 +180,7 @@ SELECT
 FROM Users u -- 기준 테이블 잘 잡긔..
 LEFT JOIN Orders o 
   ON u.user_id = o.buyer_id AND YEAR(o.order_date) = 2019 -- 애초에 2019로 거르고 join
-GROUP BY u.user_id;
+GROUP BY u.user_id; -- sql 표준에서는 user_id로만 group by 하면 안 되고, select에서 비집계 컬럼은 다 group by에 넣어야함 > GROUP BY user_id, join_date; 이렇게 해야함
 
 /*
 join vs left join
