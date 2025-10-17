@@ -185,4 +185,5 @@ DATE_ADD(date, INTERVAL n DAY) : 특정 날짜(date)에 n일을 더하는 날짜
 
 주의!!!
 가장 첫날부터 7일이 지나야 이동평균이 계산 가능하니까, 7일 이전의 데이터는 제외하는 조건 꼭 필요함
-WHERE visited_on >= (SELECT DATE_ADD(MIN(visited_on), INTERVAL 6 DAY))*/
+WHERE visited_on >= (SELECT DATE_ADD(MIN(visited_on), INTERVAL 6 DAY))
+*/
