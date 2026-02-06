@@ -1,0 +1,3 @@
+- Sep 2025 ~ Oct 2025 leetcode SQL practices
+- Feb 2026 ~ MySQL lecture & study
+- Feb 2026 ~ leetcode SQL practices
