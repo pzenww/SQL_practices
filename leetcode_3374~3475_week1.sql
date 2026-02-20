@@ -39,3 +39,64 @@ order by a.id , a.subject
 
 -- [ 3451 ]
 
+- 너무 어려워요 .. 솔루션 봐도 이해가 힘들어..
+
+WITH
+  cte_invalid_ip AS (
+    SELECT log_id, ip
+    FROM logs
+    WHERE NOT regexp_like(ip, "^(?:[1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(?:[.](?:[1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}$")
+  ),
+  cte_invalid_ip_count AS (
+    SELECT ip, count(log_id) 'invalid_count'
+    FROM cte_invalid_ip
+    GROUP BY ip
+  )
+SELECT ip, invalid_count
+FROM cte_invalid_ip_count
+ORDER BY invalid_count DESC, ip DESC;
+
+- 프로그래머스로 바꾸는게 어떨지 ..?
+
+
+-- [ 3475 ]
+
+- 일단 이렇게 하긴 했는데.. 오 됨 !!! 문법 약간 잘못한거 고치니까 됨 !! 뿌듯한데 개 힘들다 중간 난이도도 버거움
+  
+WITH has_start AS (
+    SELECT
+        sample_id,
+        IF(LEFT(dna_sequence, 3) = 'ATG', 1, 0) AS has_start
+    FROM Samples
+),
+has_stop AS (
+    SELECT
+        sample_id,
+        IF(RIGHT(dna_sequence, 3) IN ('TAA','TAG','TGA'), 1, 0) AS has_stop
+    FROM Samples
+),
+has_atat AS (
+    SELECT
+        sample_id,
+        IF(dna_sequence LIKE '%ATAT%', 1, 0) AS has_atat
+    FROM Samples
+),
+has_ggg AS (
+    SELECT
+        sample_id,
+        IF(dna_sequence LIKE '%GGG%', 1, 0) AS has_ggg
+    FROM Samples
+)
+SELECT
+    s.sample_id,
+    s.dna_sequence,
+    s.species,
+    t.has_start,
+    p.has_stop,
+    a.has_atat,
+    g.has_ggg
+FROM Samples s
+LEFT JOIN has_start t ON t.sample_id = s.sample_id
+LEFT JOIN has_stop  p ON p.sample_id = s.sample_id
+LEFT JOIN has_atat  a ON a.sample_id = s.sample_id
+LEFT JOIN has_ggg   g ON g.sample_id = s.sample_id;
